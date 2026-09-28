@@ -80,10 +80,11 @@ function filterAndMapObservations(
       ?.filter((entry) => entry?.resource?.resourceType === 'Observation')
       ?.map((entry) => {
         const resource = entry.resource as fhir.Observation;
+        const conceptUuid = resource.code.coding?.find((coding) => isUuid(coding.code))?.code ?? '';
         const observation: ObsResult = {
           ...resource,
-          conceptUuid: resource.code.coding.find((c) => isUuid(c.code))?.code,
-          dataType: conceptByUuid[resource.code.coding.find((c) => isUuid(c.code))?.code]?.dataType,
+          conceptUuid,
+          dataType: conceptByUuid[conceptUuid]?.dataType,
         };
 
         // Observation.encounter is optional in FHIR; obs created without an
@@ -114,6 +115,6 @@ function getEncountersFromResources(resources: Array<fhir.BundleEntry>) {
     }));
 }
 
-function isUuid(input: string) {
-  return input.length === 36;
+function isUuid(input?: string) {
+  return input?.length === 36;
 }
