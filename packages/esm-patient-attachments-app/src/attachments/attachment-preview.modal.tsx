@@ -21,7 +21,9 @@ const AttachmentPreviewModal: React.FC<AttachmentPreviewModalProps> = ({ attachm
       <ModalHeader closeModal={closeModal} title={attachment.filename}>
         {attachment.description ? (
           <p className={styles.description}>
-            <Linkify options={{ target: '_blank' }}>{attachment.description}</Linkify>
+            <Linkify options={{ target: '_blank', attributes: { rel: 'noopener noreferrer' } }}>
+              {attachment.description}
+            </Linkify>
           </p>
         ) : null}
       </ModalHeader>
