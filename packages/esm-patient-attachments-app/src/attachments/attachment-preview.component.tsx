@@ -72,7 +72,9 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
         <h4 className={styles.title}>{attachmentToPreview.filename}</h4>
         {attachmentToPreview?.description ? (
           <p className={styles.imageDescription}>
-            <Linkify options={{ target: '_blank' }}>{attachmentToPreview.description}</Linkify>
+            <Linkify options={{ target: '_blank', attributes: { rel: 'noopener noreferrer' } }}>
+              {attachmentToPreview.description}
+            </Linkify>
           </p>
         ) : null}
       </div>
