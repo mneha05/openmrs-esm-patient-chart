@@ -28,3 +28,18 @@ it('provides descriptive names for the attachment menu and its delete action', a
   expect(deleteItem).not.toHaveAttribute('aria-label');
   expect(deleteItem).toHaveTextContent('Delete image');
 });
+
+
+it('protects links in attachment descriptions opened in a new tab', () => {
+  render(
+    <AttachmentPreview
+      attachmentToPreview={{ ...attachment, description: 'See https://example.com/report' }}
+      onClosePreview={vi.fn()}
+      onDeleteAttachment={vi.fn()}
+    />,
+  );
+
+  const link = screen.getByRole('link', { name: 'https://example.com/report' });
+  expect(link).toHaveAttribute('target', '_blank');
+  expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+});
