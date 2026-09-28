@@ -31,6 +31,14 @@ const obsWithoutEncounter = {
   valueQuantity: { value: 70 },
 };
 
+const obsWithCodingWithoutCode = {
+  resourceType: 'Observation',
+  id: 'obs-with-coding-without-code',
+  code: { coding: [{ system: 'http://loinc.org', display: 'Weight' }] },
+  effectiveDateTime: '2021-03-01T00:00:00Z',
+  valueQuantity: { value: 74 },
+};
+
 const encounterResource = {
   resourceType: 'Encounter',
   id: 'enc-1',
@@ -73,5 +81,25 @@ describe('useObs', () => {
 
     // The FHIR resources held by the SWR cache must not be mutated.
     expect(obsWithEncounter.encounter).toEqual({ reference: 'Encounter/enc-1' });
+  });
+
+  it('handles coding entries without a code', async () => {
+    const bundle = {
+      resourceType: 'Bundle',
+      entry: [{ resource: obsWithCodingWithoutCode }],
+    };
+    mockOpenmrsFetch.mockResolvedValue({ data: bundle } as never);
+
+    const { result } = renderHook(() => useObs('patient-with-incomplete-coding'));
+
+    await waitFor(() => {
+      expect(result.current.data.observations).toHaveLength(1);
+    });
+
+    expect(result.current.data.observations[0]).toMatchObject({
+      id: 'obs-with-coding-without-code',
+      conceptUuid: '',
+    });
+    expect(result.current.data.observations[0].dataType).toBeUndefined();
   });
 });
