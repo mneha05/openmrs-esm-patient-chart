@@ -55,3 +55,17 @@ test('offers to open a file it cannot preview', () => {
   expect(screen.getByText(/no preview is available/i)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Open file' })).toHaveAttribute('href', image.src);
 });
+
+
+test('protects links in the attachment description when opened in a new tab', () => {
+  render(
+    <AttachmentPreviewModal
+      attachment={{ ...image, description: 'See https://example.com/report' }}
+      closeModal={vi.fn()}
+    />,
+  );
+
+  const link = screen.getByRole('link', { name: 'https://example.com/report' });
+  expect(link).toHaveAttribute('target', '_blank');
+  expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+});
