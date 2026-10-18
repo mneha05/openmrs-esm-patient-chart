@@ -172,7 +172,16 @@ export async function postOrders(
     const dataPrepFn = postDataPrepFunctions[grouping];
 
     if (typeof dataPrepFn !== 'function') {
-      console.warn(`The postDataPrep function registered for ${grouping} orders is not a function`);
+      // These orders have not been submitted. Returning them as failures keeps them visible in
+      // the basket's error workflow instead of silently reporting an incomplete submission.
+      const error = new Error(`Cannot submit ${grouping} orders: no order payload preparation function is registered.`);
+      for (const order of orders) {
+        erroredItems.push({
+          ...order,
+          orderError: error,
+          extractedOrderError: { message: error.message, fieldErrors: [], globalErrors: [] },
+        });
+      }
       continue;
     }
 
