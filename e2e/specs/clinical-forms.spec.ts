@@ -28,16 +28,16 @@ test('Fill a clinical form', async ({ page, patient }) => {
 
     await expect(page.getByRole('cell', { name: 'Covid 19', exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: /laboratory test results/i, exact: true })).toBeVisible();
-    await expect(page.getByRole('cell', { name: /soap note template/i, exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: /structured soap note/i, exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: /surgical operation/i, exact: true })).toBeVisible();
   });
 
-  await test.step('When I click the `Soap note template` link to launch the form', async () => {
-    await page.getByText(/soap note template/i).click();
+  await test.step('When I click the `Structured SOAP note` link to launch the form', async () => {
+    await page.getByText(/structured soap note/i).click();
   });
 
-  await test.step('Then I should see the `Soap note template` form launch in the workspace', async () => {
-    await expect(page.locator('header').filter({ hasText: /soap note template/i })).toBeVisible();
+  await test.step('Then I should see the `Structured SOAP note` form launch in the workspace', async () => {
+    await expect(page.locator('header').filter({ hasText: /structured soap note/i })).toBeVisible();
   });
 
   await test.step('When I fill the `Subjective findings` question', async () => {
@@ -68,7 +68,7 @@ test('Fill a clinical form', async ({ page, patient }) => {
     await page.getByRole('button', { name: /clinical forms/i }).click();
   });
 
-  await test.step('Then I should see retained inputs in `Soap note template` form', async () => {
+  await test.step('Then I should see retained inputs in `Structured SOAP note` form', async () => {
     await expect(page.getByText(subjectiveFindings)).toBeVisible();
     await expect(page.getByText(objectiveFindings)).toBeVisible();
     await expect(page.getByText(assessment)).toBeVisible();
@@ -170,16 +170,16 @@ test('Form state is retained when moving between forms in the workspace', async 
     await page.getByLabel(/clinical forms/i, { exact: true }).click();
   });
 
-  await test.step('Then I should see `Soap note template` listed in the clinical forms workspace', async () => {
-    await expect(page.getByRole('cell', { name: /soap note template/i, exact: true })).toBeVisible();
+  await test.step('Then I should see `Structured SOAP note` listed in the clinical forms workspace', async () => {
+    await expect(page.getByRole('cell', { name: /structured soap note/i, exact: true })).toBeVisible();
   });
 
-  await test.step('When I click the `Soap note template` link to launch the form', async () => {
-    await page.getByText(/soap note template/i).click();
+  await test.step('When I click the `Structured SOAP note` link to launch the form', async () => {
+    await page.getByText(/structured soap note/i).click();
   });
 
-  await test.step('Then I should see the `Soap note template` form launch in the workspace', async () => {
-    await expect(page.locator('header').filter({ hasText: /soap note template/i })).toBeVisible();
+  await test.step('Then I should see the `Structured SOAP note` form launch in the workspace', async () => {
+    await expect(page.locator('header').filter({ hasText: /structured soap note/i })).toBeVisible();
   });
 
   await test.step('When I fill the `Subjective findings` and `Objective findings` questions', async () => {
@@ -199,7 +199,7 @@ test('Form state is retained when moving between forms in the workspace', async 
     await page.getByLabel(/clinical forms/i, { exact: true }).click();
   });
 
-  await test.step('Then I should see retained inputs in `Soap note template` form', async () => {
+  await test.step('Then I should see retained inputs in `Structured SOAP note` form', async () => {
     await page.locator('#SOAPSubjectiveFindings').waitFor();
     await expect(page.getByText(subjectiveFindings)).toBeVisible();
     await expect(page.getByText(objectiveFindings)).toBeVisible();

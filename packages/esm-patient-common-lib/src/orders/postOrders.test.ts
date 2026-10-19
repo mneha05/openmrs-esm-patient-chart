@@ -1,7 +1,7 @@
 import { openmrsFetch, parseDate, toOmrsIsoString, type Visit } from '@openmrs/esm-framework';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { orderBasketStore, _resetOrderBasketStore } from './store';
-import { type EncounterPost, postOrdersOnNewEncounter } from './postOrders';
+import { type EncounterPost, postOrders, postOrdersOnNewEncounter } from './postOrders';
 import { type OrderPost, type PostDataPrepFunction } from './types';
 
 const patientUuid = 'patient-uuid';
@@ -156,6 +156,48 @@ describe('postOrdersOnNewEncounter', () => {
     await expect(
       postOrdersOnNewEncounter(patientUuid, encounterType, openVisit, locationUuid, ordererUuid),
     ).rejects.toThrow('not-a-date');
+    expect(openmrsFetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('postOrders missing payload preparation', () => {
+  beforeEach(() => {
+    _resetOrderBasketStore();
+    vi.mocked(openmrsFetch).mockClear();
+  });
+
+  it('reports every order from an unregistered group instead of silently dropping them', async () => {
+    orderBasketStore.setState({
+      items: {
+        [patientUuid]: {
+          unregistered: [
+            { action: 'NEW', display: 'First test' },
+            { action: 'NEW', display: 'Second test' },
+          ] as never,
+        },
+      },
+      postDataPrepFunctions: {},
+    });
+
+    const result = await postOrders(patientUuid, 'encounter-uuid', new AbortController(), ordererUuid);
+
+    expect(result.postedOrders).toEqual([]);
+    expect(result.erroredItems).toHaveLength(2);
+    expect(result.erroredItems.map((item) => item.display)).toEqual(['First test', 'Second test']);
+    expect(result.erroredItems[0].extractedOrderError?.message).toMatch(/no order payload preparation function/);
+    expect(openmrsFetch).not.toHaveBeenCalled();
+  });
+
+  it('does not invent failures for an empty unregistered group', async () => {
+    orderBasketStore.setState({
+      items: { [patientUuid]: { unregistered: [] } },
+      postDataPrepFunctions: {},
+    });
+
+    const result = await postOrders(patientUuid, 'encounter-uuid', new AbortController(), ordererUuid);
+
+    expect(result.erroredItems).toEqual([]);
+    expect(result.postedOrders).toEqual([]);
     expect(openmrsFetch).not.toHaveBeenCalled();
   });
 });
