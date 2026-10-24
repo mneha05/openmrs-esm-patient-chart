@@ -57,6 +57,7 @@ import {
   useVisitNoteImages,
   useVisitNotes,
 } from './visit-notes.resource';
+import { shouldOmitEncounterDatetime } from './visit-note-date';
 import SelectedDiagnosisCard, {
   DiagnosisListHeader,
   type DiagnosisDraft,
@@ -391,20 +392,21 @@ const VisitNotesForm: React.FC<VisitNotesFormProps> = ({
       const { noteDate, clinicalNote, images, removedImageIds, diagnoses } = data;
       setSaveError(undefined);
 
-      let finalNoteDate = dayjs(noteDate);
-      const now = new Date();
-
-      // When RDE is off, the datepicker is hidden and noteDate defaults to new Date().
-      // This always falls within the 30-minute window, so encounterDatetime is intentionally
-      // omitted from the payload -> letting the server attach the correct timestamp.
-      if (finalNoteDate.diff(now, 'minute') <= 30) {
-        finalNoteDate = null;
-      }
+      // A note entered for an earlier encounter must keep its selected date. For
+      // current notes, let the server assign the timestamp; edits keep theirs.
+      const encounterDatetime = shouldOmitEncounterDatetime(
+        noteDate,
+        new Date(),
+        isEditing,
+        isRetrospectiveDataEntryEnabled,
+      )
+        ? undefined
+        : dayjs(noteDate).format();
 
       const existingClinicalNoteObs = encounter?.obs?.find((obs) => obs.concept.uuid === encounterNoteTextConceptUuid);
 
       const visitNotePayload: VisitNotePayload = {
-        encounterDatetime: finalNoteDate?.format(),
+        encounterDatetime,
         form: formConceptUuid,
         patient: patientUuid,
         location: locationUuid,
